@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
+# Test commit to verify git functionality
 import sys
 import os
 from config import Config
 
+def print_welcome():
+    print("Welcome to dependency visualizer")
+
 def main():
+    print_welcome()
     if len(sys.argv) != 2:
         print("Usage: python main.py <config_file>")
         sys.exit(1)
