@@ -1,0 +1,25 @@
+===========================================
+ИНСТРУКЦИЯ ПО ЗАПУСКУ ПРОГРАММЫ
+===========================================
+
+Команда для запуска (в терминале PowerShell или CMD):
+
+    py dependency_visualizer\depvis_stage1.py -c test_config.xml
+
+Или:
+
+    py dependency_visualizer\depvis_stage1.py -c dependency_visualizer\config.xml
+
+===========================================
+
+Ожидаемый результат:
+    package_name=A
+    repo_url_or_path=test_repo.txt
+    test_repo_mode=true
+    output_image_name=output/test.svg
+    filter_substring=
+
+===========================================
+
+Убедитесь, что вы находитесь в директории проекта!
+
