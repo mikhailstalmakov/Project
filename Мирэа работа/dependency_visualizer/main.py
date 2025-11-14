@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # Test commit to verify git functionality
+#2312
 import sys
 import os
 from config import Config
-
+def print_hello():
+    print("hello")
 def print_welcome():
     print("Welcome to dependency visualizer")
 
