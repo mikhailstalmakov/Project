@@ -5,7 +5,7 @@ import sys
 import os
 from config import Config
 def print_hello():
-    print("hello")
+    print("hello33")
 def print_welcome():
     print("Welcome to dependency visualizer")
 
