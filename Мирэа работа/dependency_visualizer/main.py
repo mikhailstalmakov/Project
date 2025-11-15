@@ -11,11 +11,6 @@ from graph_builder import GraphBuilder
 from visualizer import Visualizer
 
 
-def print_hello():
-    """Тестовая функция."""
-    print("hello33")
-
-
 def print_welcome():
     """Приветственное сообщение."""
     print("Welcome to dependency visualizer")

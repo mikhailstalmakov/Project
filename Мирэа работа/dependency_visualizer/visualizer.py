@@ -32,21 +32,89 @@ class Visualizer:
         lines.append("// Dependency graph visualization")
         lines.append("")
         
-        # Создаем узлы и связи
+        # Собираем все пакеты
         all_packages = set()
+        root_packages = set()  # Пакеты, которые не являются зависимостями других
         for package, deps in self.graph.items():
             all_packages.add(package)
             all_packages.update(deps)
+            root_packages.add(package)
         
-        # Определяем связи (D2 автоматически создает узлы)
+        # Убираем из корневых те, которые являются зависимостями
         for package, deps in self.graph.items():
             for dep in deps:
-                # Экранируем специальные символы в именах пакетов
+                if dep in root_packages:
+                    root_packages.discard(dep)
+        
+        # Если есть корневой пакет, выделяем его
+        if root_packages:
+            root_pkg = list(root_packages)[0]
+            lines.append(f'{self._escape_d2_identifier(root_pkg)}: {{')
+            lines.append(f'  label: "{root_pkg}"')
+            lines.append(f'  style.fill: "#4A90E2"')
+            lines.append(f'  style.stroke: "#2E5C8A"')
+            lines.append(f'  style.stroke-width: 3')
+            lines.append('}')
+            lines.append("")
+        
+        # Определяем стили для зависимостей
+        # Находим глубину каждого узла для цветового кодирования
+        depth_map = self._calculate_depths(root_packages if root_packages else set(self.graph.keys()))
+        colors = ["#E8F4F8", "#D4E8F1", "#B8D9E8", "#9CC5DF", "#7FB1D6", "#639DCD"]
+        
+        # Создаем узлы с стилями
+        for package in sorted(all_packages):
+            if package in root_packages:
+                continue  # Уже создан выше
+            
+            depth = depth_map.get(package, 0)
+            color = colors[min(depth, len(colors) - 1)]
+            
+            lines.append(f'{self._escape_d2_identifier(package)}: {{')
+            lines.append(f'  label: "{package}"')
+            lines.append(f'  style.fill: "{color}"')
+            lines.append(f'  style.stroke: "#5A7A9A"')
+            lines.append('}')
+        
+        lines.append("")
+        
+        # Определяем связи
+        for package, deps in self.graph.items():
+            for dep in deps:
                 pkg_escaped = self._escape_d2_identifier(package)
                 dep_escaped = self._escape_d2_identifier(dep)
                 lines.append(f'{pkg_escaped} -> {dep_escaped}')
         
         return '\n'.join(lines)
+    
+    def _calculate_depths(self, root_packages):
+        """
+        Вычислить минимальную глубину каждого узла от корня.
+        
+        Args:
+            root_packages: Множество корневых пакетов
+            
+        Returns:
+            Словарь: пакет -> глубина
+        """
+        depth_map = {}
+        queue = [(pkg, 0) for pkg in root_packages]
+        
+        while queue:
+            package, depth = queue.pop(0)
+            
+            # Если уже посетили с меньшей глубиной, пропускаем
+            if package in depth_map and depth_map[package] <= depth:
+                continue
+            
+            depth_map[package] = depth
+            
+            if package in self.graph:
+                for dep in self.graph[package]:
+                    # Добавляем зависимость с увеличенной глубиной
+                    queue.append((dep, depth + 1))
+        
+        return depth_map
     
     def _escape_d2_identifier(self, identifier):
         """
