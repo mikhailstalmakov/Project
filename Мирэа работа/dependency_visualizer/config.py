@@ -29,7 +29,8 @@ class Config:
         self.repo_url = self._get_text(root, 'repo_url')
         self.test_mode = self._get_bool(root, 'test_mode')
         self.output_file = self._get_text(root, 'output_file')
-        self.filter_substring = self._get_text(root, 'filter_substring')
+        # filter_substring может быть пустым (означает "без фильтрации")
+        self.filter_substring = self._get_text_optional(root, 'filter_substring')
     
     def _get_text(self, root, tag):
         """
@@ -48,6 +49,23 @@ class Config:
         element = root.find(tag)
         if element is None or element.text is None:
             raise ValueError(f"Missing or empty parameter: {tag}")
+        return element.text.strip()
+    
+    def _get_text_optional(self, root, tag):
+        """
+        Получить текстовое значение элемента (опциональный параметр).
+        Если элемент отсутствует или пуст, возвращает пустую строку.
+        
+        Args:
+            root: Корневой элемент XML
+            tag: Имя тега
+            
+        Returns:
+            Текстовое значение или пустая строка
+        """
+        element = root.find(tag)
+        if element is None or element.text is None:
+            return ""
         return element.text.strip()
     
     def _get_bool(self, root, tag):
