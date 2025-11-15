@@ -11,15 +11,10 @@ from graph_builder import GraphBuilder
 from visualizer import Visualizer
 
 
-def print_welcome():
-    """Приветственное сообщение."""
-    print("Welcome to dependency visualizer")
 
 
 def main():
     """Главная функция приложения."""
-    print_welcome()
-    
     if len(sys.argv) < 2:
         print("Usage: python main.py <config_file> [--reverse <package>]")
         print("  --reverse <package>: Show reverse dependencies for a package")
