@@ -1,15 +1,29 @@
 import xml.etree.ElementTree as ET
 import os
-import urllib.request
-import json
+
 
 class Config:
+    """Класс для работы с конфигурацией из XML файла."""
+    
     def __init__(self, config_file):
+        """
+        Инициализация конфигурации из XML файла.
+        
+        Args:
+            config_file: Путь к XML файлу конфигурации
+            
+        Raises:
+            FileNotFoundError: Если файл не найден
+            ValueError: Если параметры некорректны
+        """
         if not os.path.exists(config_file):
             raise FileNotFoundError(f"Configuration file '{config_file}' not found.")
         
-        tree = ET.parse(config_file)
-        root = tree.getroot()
+        try:
+            tree = ET.parse(config_file)
+            root = tree.getroot()
+        except ET.ParseError as e:
+            raise ValueError(f"Invalid XML format: {e}")
         
         self.package_name = self._get_text(root, 'package_name')
         self.repo_url = self._get_text(root, 'repo_url')
@@ -18,46 +32,51 @@ class Config:
         self.filter_substring = self._get_text(root, 'filter_substring')
     
     def _get_text(self, root, tag):
+        """
+        Получить текстовое значение элемента.
+        
+        Args:
+            root: Корневой элемент XML
+            tag: Имя тега
+            
+        Returns:
+            Текстовое значение
+            
+        Raises:
+            ValueError: Если элемент отсутствует или пуст
+        """
         element = root.find(tag)
         if element is None or element.text is None:
             raise ValueError(f"Missing or empty parameter: {tag}")
         return element.text.strip()
     
     def _get_bool(self, root, tag):
+        """
+        Получить булево значение элемента.
+        
+        Args:
+            root: Корневой элемент XML
+            tag: Имя тега
+            
+        Returns:
+            Булево значение
+            
+        Raises:
+            ValueError: Если значение некорректно
+        """
         text = self._get_text(root, tag)
         if text.lower() in ('true', '1', 'yes'):
             return True
         elif text.lower() in ('false', '0', 'no'):
             return False
         else:
-            raise ValueError(f"Invalid boolean value for {tag}: {text}")
+            raise ValueError(f"Invalid boolean value for {tag}: {text}. Expected 'true' or 'false'")
     
     def print_params(self):
+        """Вывести все параметры конфигурации в формате ключ-значение."""
         print("Configuration parameters:")
-        print(f"package_name: {self.package_name}")
-        print(f"repo_url: {self.repo_url}")
-        print(f"test_mode: {self.test_mode}")
-        print(f"output_file: {self.output_file}")
-        print(f"filter_substring: {self.filter_substring}")
-    
-    def get_direct_dependencies(self):
-        if self.test_mode:
-            # Для тестового режима позже
-            return []
-        
-        try:
-            with urllib.request.urlopen(self.repo_url) as response:
-                data = json.loads(response.read().decode())
-            
-            info = data.get('info', {})
-            requires_dist = info.get('requires_dist', [])
-            
-            dependencies = []
-            for req in requires_dist:
-                # Парсинг requires_dist, убрать версии и т.д.
-                dep = req.split()[0].split('(')[0].strip()
-                dependencies.append(dep)
-            
-            return dependencies
-        except Exception as e:
-            raise RuntimeError(f"Failed to fetch dependencies: {e}")
+        print(f"  package_name: {self.package_name}")
+        print(f"  repo_url: {self.repo_url}")
+        print(f"  test_mode: {self.test_mode}")
+        print(f"  output_file: {self.output_file}")
+        print(f"  filter_substring: {self.filter_substring}")
